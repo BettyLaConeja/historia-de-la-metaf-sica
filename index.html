@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Quiz Filosófico - Edad Antigua</title>
+  <title>Quiz Filosófico de la Metafísica</title>
   <style>
     body {
       font-family: 'Georgia', serif;
@@ -16,7 +16,7 @@
     }
 
     .container {
-      max-width: 700px;
+      max-width: 800px;
       background: #fff;
       padding: 30px;
       box-shadow: 0 0 20px rgba(0,0,0,0.1);
@@ -25,7 +25,13 @@
     }
 
     h1 {
-      font-size: 24px;
+      font-size: 26px;
+      margin-bottom: 10px;
+    }
+
+    .epoch {
+      font-size: 18px;
+      color: #888;
       margin-bottom: 10px;
     }
 
@@ -74,102 +80,174 @@
       cursor: pointer;
     }
 
+    .score {
+      font-size: 22px;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>📜 Quiz Filosófico: Edad Antigua</h1>
+    <h1>📜 Quiz Filosófico: Historia de la Metafísica</h1>
+    <div class="epoch" id="epoch"></div>
     <div id="quiz">
       <div class="question" id="question"></div>
       <div class="answers" id="answers"></div>
       <div class="result" id="result"></div>
       <button class="next-btn" id="nextBtn" style="display: none;">Siguiente</button>
     </div>
+    <div class="score" id="score" style="display: none;"></div>
   </div>
 
   <script>
-    const questions = [
+    const levels = [
       {
-        question: "¿Qué filósofo afirmó que 'lo mismo es pensar y ser'?",
-        options: ["Sócrates", "Parménides", "Aristóteles", "Platón"],
-        answer: "Parménides"
+        name: "Edad Antigua",
+        questions: [
+          {
+            question: "¿Quién dijo 'lo mismo es pensar y ser'?",
+            options: ["Aristóteles", "Parménides", "Sócrates", "Platón"],
+            answer: "Parménides"
+          },
+          {
+            question: "¿Qué técnica usaba Sócrates para llegar a la verdad?",
+            options: ["Adivinación", "Dialéctica", "Mayéutica", "Retórica"],
+            answer: "Mayéutica"
+          },
+          {
+            question: "¿Qué son las Ideas para Platón?",
+            options: ["Cosas físicas", "Recuerdos", "Modelos eternos", "Dioses menores"],
+            answer: "Modelos eternos"
+          }
+        ]
       },
       {
-        question: "¿Qué buscaba Sócrates a través de la mayéutica?",
-        options: ["Explicar el arjé", "Distinguir el ser del no-ser", "Llegar al logos o razón final", "Probar la existencia de Dios"],
-        answer: "Llegar al logos o razón final"
+        name: "Edad Media",
+        questions: [
+          {
+            question: "¿Qué buscaban los escolásticos?",
+            options: ["Rechazar la religión", "Unir filosofía y religión", "Criticar a los griegos", "Negar la metafísica"],
+            answer: "Unir filosofía y religión"
+          },
+          {
+            question: "¿Qué es la 'creación ex nihilo'?",
+            options: ["Crear desde la materia", "Crear desde lo invisible", "Crear desde la nada", "Crear desde la mente"],
+            answer: "Crear desde la nada"
+          }
+        ]
       },
       {
-        question: "¿Qué son las Ideas para Platón?",
-        options: ["Percepciones sensibles", "Copias de los objetos", "Parámetros de las cosas", "Representaciones divinas"],
-        answer: "Parámetros de las cosas"
+        name: "Edad Moderna",
+        questions: [
+          {
+            question: "¿Qué hizo Kant con la metafísica tradicional?",
+            options: ["La confirmó", "La rechazó como ciencia", "La integró con la religión", "La convirtió en arte"],
+            answer: "La rechazó como ciencia"
+          },
+          {
+            question: "¿Qué es la 'Crítica de la razón pura'?",
+            options: ["Un tratado de lógica", "Una novela filosófica", "Un análisis del conocimiento humano", "Un experimento mental"],
+            answer: "Un análisis del conocimiento humano"
+          }
+        ]
       },
       {
-        question: "¿Qué afirmaba Meliso de Samos sobre el ser?",
-        options: ["Que el ser es múltiple", "Que el ser es finito", "Que el ser es eterno e infinito", "Que el ser depende de Dios"],
-        answer: "Que el ser es eterno e infinito"
-      },
-      {
-        question: "¿Cuál es el enfoque principal de la filosofía de Aristóteles?",
-        options: ["Las Ideas", "La moral", "El ser en cuanto ser", "La existencia de Dios"],
-        answer: "El ser en cuanto ser"
+        name: "Edad Contemporánea",
+        questions: [
+          {
+            question: "¿Qué postura tenía Marx sobre la metafísica?",
+            options: ["La desarrolló", "La ignoró", "La criticó", "La transformó"],
+            answer: "La criticó"
+          },
+          {
+            question: "¿Qué dice Heidegger sobre el ser?",
+            options: ["Es lo mismo que Dios", "No se puede pensar como ente", "Es una ilusión", "No existe"],
+            answer: "No se puede pensar como ente"
+          }
+        ]
       }
     ];
 
-    let currentQuestion = 0;
+    let levelIndex = 0;
+    let questionIndex = 0;
+    let score = 0;
 
-    const questionElement = document.getElementById("question");
-    const answersElement = document.getElementById("answers");
-    const resultElement = document.getElementById("result");
+    const epochEl = document.getElementById("epoch");
+    const questionEl = document.getElementById("question");
+    const answersEl = document.getElementById("answers");
+    const resultEl = document.getElementById("result");
     const nextBtn = document.getElementById("nextBtn");
+    const scoreEl = document.getElementById("score");
 
     function showQuestion() {
-      const q = questions[currentQuestion];
-      questionElement.textContent = q.question;
-      answersElement.innerHTML = "";
-      resultElement.textContent = "";
+      const currentLevel = levels[levelIndex];
+      const currentQuestion = currentLevel.questions[questionIndex];
+
+      epochEl.textContent = `📚 Época: ${currentLevel.name}`;
+      questionEl.textContent = currentQuestion.question;
+      answersEl.innerHTML = "";
+      resultEl.textContent = "";
       nextBtn.style.display = "none";
 
-      q.options.forEach(option => {
-        const button = document.createElement("button");
-        button.textContent = option;
-        button.onclick = () => checkAnswer(option, q.answer);
-        answersElement.appendChild(button);
+      currentQuestion.options.forEach(option => {
+        const btn = document.createElement("button");
+        btn.textContent = option;
+        btn.onclick = () => checkAnswer(option, currentQuestion.answer);
+        answersEl.appendChild(btn);
       });
     }
 
     function checkAnswer(selected, correct) {
-      const buttons = answersElement.querySelectorAll("button");
+      const buttons = answersEl.querySelectorAll("button");
       buttons.forEach(btn => btn.disabled = true);
 
       if (selected === correct) {
-        resultElement.textContent = "✅ ¡Correcto!";
-        resultElement.className = "result correct";
+        resultEl.textContent = "✅ ¡Correcto!";
+        resultEl.className = "result correct";
+        score++;
       } else {
-        resultElement.textContent = `❌ Incorrecto. La respuesta correcta era: ${correct}`;
-        resultElement.className = "result incorrect";
+        resultEl.textContent = `❌ Incorrecto. Respuesta correcta: ${correct}`;
+        resultEl.className = "result incorrect";
       }
 
       nextBtn.style.display = "inline-block";
     }
 
     nextBtn.onclick = () => {
-      currentQuestion++;
-      if (currentQuestion < questions.length) {
+      const currentLevel = levels[levelIndex];
+      questionIndex++;
+
+      if (questionIndex < currentLevel.questions.length) {
         showQuestion();
       } else {
-        showFinalMessage();
+        levelIndex++;
+        questionIndex = 0;
+        if (levelIndex < levels.length) {
+          showQuestion();
+        } else {
+          showFinalScore();
+        }
       }
     };
 
-    function showFinalMessage() {
-      questionElement.textContent = "¡Has completado el quiz filosófico!";
-      answersElement.innerHTML = "";
-      resultElement.textContent = "🌟 ¿Qué tan cerca estás del conocimiento absoluto?";
+    function showFinalScore() {
+      epochEl.textContent = "";
+      questionEl.textContent = "🎉 Has completado el recorrido histórico de la metafísica.";
+      answersEl.innerHTML = "";
+      resultEl.textContent = "";
+      scoreEl.textContent = `🧠 Tu puntaje final es: ${score} / ${totalQuestions()}`;
+      scoreEl.style.display = "block";
       nextBtn.style.display = "none";
     }
 
+    function totalQuestions() {
+      return levels.reduce((total, level) => total + level.questions.length, 0);
+    }
+
+    // Iniciar
     showQuestion();
   </script>
 </body>
 </html>
+
+     
